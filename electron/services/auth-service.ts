@@ -1,10 +1,11 @@
 import * as crypto from 'crypto';
+import { config } from '../utils/config';
 
 export class AuthService {
   private pkceStore = new Map<string, string>();
-  private readonly AUTH_DOMAIN = "https://us-east-1l8xttvvw4.auth.us-east-1.amazoncognito.com";
-  private readonly CLIENT_ID = "7huhicf17qof5kq3hhrf9knca7";
-  private readonly REDIRECT_URI = "http://localhost:4200/";
+  private readonly AUTH_DOMAIN = config.auth.authDomain;
+  private readonly CLIENT_ID = config.auth.clientId;
+  private readonly REDIRECT_URI = config.auth.redirectUri;
 
   private base64URLEncode(buffer: Buffer): string {
     return buffer

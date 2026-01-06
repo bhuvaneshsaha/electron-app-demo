@@ -1,10 +1,11 @@
 import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from 'electron';
 import { authService } from '../services/auth-service';
+import { config } from '../utils/config';
 
 let exchangeInProgress = false;
 
 function handleAuthCallback(url: string, authWindow: BrowserWindow, resolve: (value: string | null) => void) {
-  if (!url.startsWith("http://localhost:4200")) return;
+  if (!url.startsWith(config.auth.redirectUri)) return;
 
   const parsedUrl = new URL(url);
   const code = parsedUrl.searchParams.get("code");
@@ -33,8 +34,8 @@ export function registerAuthHandlers(mainWindow: BrowserWindow) {
       const { codeChallenge } = authService.generatePKCE();
 
       const authWindow = new BrowserWindow({
-        width: 500,
-        height: 700,
+        width: config.authWindow.width,
+        height: config.authWindow.height,
         modal: true,
         parent: mainWindow,
         webPreferences: {
@@ -50,7 +51,7 @@ export function registerAuthHandlers(mainWindow: BrowserWindow) {
       authWindow.loadURL(authUrl);
 
       const handleUrl = (url: string, event: Electron.Event) => {
-        if (url.startsWith("http://localhost:4200")) {
+        if (url.startsWith(config.auth.redirectUri)) {
            if (event && event.preventDefault) event.preventDefault();
            handleAuthCallback(url, authWindow, resolve);
         }
@@ -69,7 +70,7 @@ export function registerAuthHandlers(mainWindow: BrowserWindow) {
       authWindow.webContents.on("did-navigate", (event, url) => {
         console.log("➡️ Did navigate detected:", url);
         // did-navigate event does not have preventDefault
-        if (url.startsWith("http://localhost:4200")) {
+        if (url.startsWith(config.auth.redirectUri)) {
            handleAuthCallback(url, authWindow, resolve);
         }
       });

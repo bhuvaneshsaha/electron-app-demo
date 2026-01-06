@@ -4,6 +4,7 @@ import { registerAuthHandlers } from "./handlers/auth-handler";
 import { registerShellHandlers } from "./handlers/shell-handler";
 import { registerWindowHandlers } from "./handlers/window-handler";
 import { registerAppHandlers } from "./handlers/app-handler";
+import { config } from "./utils/config";
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -12,8 +13,8 @@ let isQuiting = false;
 function createWindow() {
   mainWindow = new BrowserWindow({
     autoHideMenuBar: true,
-    width: 1200,
-    height: 800,
+    width: config.window.width,
+    height: config.window.height,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -24,7 +25,7 @@ function createWindow() {
   });
 
   // Path adjustment: We are in dist-electron/main.js
-  mainWindow.loadFile(path.join(__dirname, "../dist/electron-app-demo/browser/index.html"));
+  mainWindow.loadFile(path.join(__dirname, config.paths.indexHtml));
 
   mainWindow.setMenu(null);
 
@@ -55,7 +56,7 @@ app.whenReady().then(() => {
   // CREATE TRAY
   // icon is in build/icon.ico relative to root. 
   // From dist-electron/, it is ../build/icon.ico
-  tray = new Tray(path.join(__dirname, "../electron/logo.ico"));
+  tray = new Tray(config.tray.iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -73,7 +74,7 @@ app.whenReady().then(() => {
     },
   ]);
 
-  tray.setToolTip("First App");
+  tray.setToolTip(config.tray.tooltip);
   tray.setContextMenu(contextMenu);
 
   tray.on("double-click", () => {
