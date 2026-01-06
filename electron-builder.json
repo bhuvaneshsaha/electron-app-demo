@@ -1,0 +1,16 @@
+{
+  "appId": "com.yourcompany.first",
+  "productName": "FirstApp",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "main.js",
+    "package.json"
+  ],
+  "win": {
+    "icon": "favicon.ico",
+    "target": "nsis"
+  }
+}

@@ -1,59 +1,95 @@
-# ElectronAppDemo
+# Electron + Angular Architecture Documentation
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.13.
+This project integrates **Angular (Renderer Process)** with **Electron (Main Process)**. 
+Use this guide to understand how communication flows between them and how to add new features.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🏗️ Architecture Overview
 
-```bash
-ng serve
+The app uses a **secure, type-safe IPC (Inter-Process Communication)** bridge.
+The goal is to keep the Angular app agnostic of Electron internals, relying on an interface and a service wrapper.
+
+### **Communication Flow**
+1. **Angular Component/Store**: Calls a method in `ElectronService`.
+2. **ElectronService**: Checks if running in Electron. If yes, calls `window.electron.[method]`.
+3. **Preload Script (`preload.ts`)**: The bridge that passes the call from Renderer to Main using `ipcRenderer.invoke`.
+4. **Main Handler (`handlers/*.ts`)**: Listens for the event name, executes Node.js logic, and returns a result.
+
+---
+
+## 📂 Project Structure
+
+### **1. Angular (Renderer)**
+*   `src/app/core/services/electron.service.ts`: The **only** place where `window.electron` is accessed. It provides safe fallbacks for web browsers.
+*   `src/app/core/interfaces/electron-api.interface.ts`: Defines the strict contract (TypeScript Interface) for the API exposed by the preload script.
+
+### **2. Bridge (Preload)**
+*   `electron/preload.ts`: Exposes specific, limited APIs to the renderer using `contextBridge`. It does **not** expose the entire Node.js runtime (for security).
+
+### **3. Electron (Main)**
+*   `electron/main.ts`: Entry point. Creates the window and registers handlers.
+*   `electron/handlers/`: Contains the actual logic for Electron tasks (FileSystem, Auth, Window Controls), keeping `main.ts` clean.
+
+---
+
+## 🚀 How to Add a New Electron Feature
+
+Example: Adding a feature to **"Read a text file"**.
+
+### **Step 1: Main Process (Logic)**
+Create a handler in `electron/handlers/file-handler.ts`:
+```typescript
+import { ipcMain } from 'electron';
+import * as fs from 'fs';
+
+export function registerFileHandlers() {
+  ipcMain.handle('file:read', async (_, path) => {
+    return fs.readFileSync(path, 'utf-8');
+  });
+}
+```
+*Register this in `electron/main.ts`!*
+
+### **Step 2: Preload (Bridge)**
+Expose the method in `electron/preload.ts`:
+```typescript
+contextBridge.exposeInMainWorld('electron', {
+  // ... existing apis
+  file: {
+    read: (path: string) => ipcRenderer.invoke('file:read', path)
+  }
+});
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+### **Step 3: Interface (Type Safety)**
+Update `src/app/core/interfaces/electron-api.interface.ts`:
+```typescript
+export interface ElectronAPI {
+  // ... existing members
+  file: {
+    read: (path: string) => Promise<string>;
+  }
+}
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
+### **Step 4: Angular Service (Usage)**
+Add a wrapper in `src/app/core/services/electron.service.ts`:
+```typescript
+async readFile(path: string): Promise<string> {
+  if (this.isElectron) {
+    return await this.api!.file.read(path);
+  }
+  // Optional: Fallback for browser
+  return ''; 
+}
 ```
 
-## Building
+Now you can use `this.electronService.readFile()` anywhere in your Angular components!
 
-To build the project run:
+---
 
-```bash
-ng build
-```
+## 🛠️ Commands
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+*   `npm run electron`: specific build and run (Angular Build + Watch Electron).
+*   `ng build`: specific build for Angular only.

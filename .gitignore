@@ -2,6 +2,7 @@
 
 # Compiled output
 /dist
+/dist-electron
 /tmp
 /out-tsc
 /bazel-out
@@ -36,7 +37,6 @@ yarn-error.log
 /libpeerconnection.log
 testem.log
 /typings
-__screenshots__/
 
 # System files
 .DS_Store
