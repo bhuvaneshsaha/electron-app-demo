@@ -50,4 +50,16 @@ export class App implements OnInit {
   logout() {
     this.authStore.logout();
   }
+
+  async openMultipleWindows() {
+    const urls = [
+      'https://electronjs.org',
+      'https://angular.io',
+      'https://github.com'
+    ];
+    
+    for (const url of urls) {
+      await this.electronService.openExternal(url);
+    }
+  }
 }
