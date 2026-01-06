@@ -13,4 +13,16 @@ export function registerWindowHandlers(mainWindow: BrowserWindow) {
   ipcMain.handle("window:toggleFullscreen", () => {
     windowUtils.toggleFullscreen(mainWindow);
   });
+
+  ipcMain.handle("window:zoomIn", () => {
+    windowUtils.zoomIn(mainWindow);
+  });
+
+  ipcMain.handle("window:zoomOut", () => {
+    windowUtils.zoomOut(mainWindow);
+  });
+
+  ipcMain.handle("window:resetZoom", () => {
+    windowUtils.resetZoom(mainWindow);
+  });
 }

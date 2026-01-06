@@ -52,6 +52,18 @@ export class ElectronService {
     if (this.isElectron) await this.api!.window.restoreAndMaximize();
   }
 
+  async zoomIn(): Promise<void> {
+    if (this.isElectron) await this.api!.window.zoomIn();
+  }
+
+  async zoomOut(): Promise<void> {
+    if (this.isElectron) await this.api!.window.zoomOut();
+  }
+
+  async resetZoom(): Promise<void> {
+    if (this.isElectron) await this.api!.window.resetZoom();
+  }
+
   // Auth
   async login(): Promise<string | null> {
     if (this.isElectron) return await this.api!.auth.login();

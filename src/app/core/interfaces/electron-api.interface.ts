@@ -3,6 +3,9 @@ export interface ElectronAPI {
     restoreAndMaximize: () => Promise<void>;
     minimize: () => Promise<void>;
     toggleFullscreen: () => Promise<void>;
+    zoomIn: () => Promise<void>;
+    zoomOut: () => Promise<void>;
+    resetZoom: () => Promise<void>;
   };
   app: {
     getVersion: () => Promise<string>;

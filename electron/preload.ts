@@ -4,7 +4,10 @@ contextBridge.exposeInMainWorld("electron", {
   window: {
     restoreAndMaximize: () => ipcRenderer.invoke("window:restoreAndMaximize"),
     minimize: () => ipcRenderer.invoke("window:minimize"),
-    toggleFullscreen: () => ipcRenderer.invoke("window:toggleFullscreen")
+    toggleFullscreen: () => ipcRenderer.invoke("window:toggleFullscreen"),
+    zoomIn: () => ipcRenderer.invoke("window:zoomIn"),
+    zoomOut: () => ipcRenderer.invoke("window:zoomOut"),
+    resetZoom: () => ipcRenderer.invoke("window:resetZoom")
   },
 
   app: {

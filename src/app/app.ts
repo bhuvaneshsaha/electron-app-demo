@@ -43,6 +43,18 @@ export class App implements OnInit {
     this.electronService.restoreAndMaximize();
   }
 
+  zoomIn() {
+    this.electronService.zoomIn();
+  }
+
+  zoomOut() {
+    this.electronService.zoomOut();
+  }
+
+  resetZoom() {
+    this.electronService.resetZoom();
+  }
+
   login() {
     this.authStore.login();
   }
